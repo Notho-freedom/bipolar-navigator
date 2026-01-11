@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
-import { useMedications } from "@/hooks/useMedications";
-import { Loader2, Pill, Plus, Clock, Check, X, AlertCircle } from "lucide-react";
+import { useMedications, Medication } from "@/hooks/useMedications";
+import { Loader2, Pill, Plus, Clock, Check, X, AlertCircle, Edit, Trash2, MoreVertical } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,14 +15,32 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 
 const Medications = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const { medications, todayLogs, isLoading, addMedication, logMedication, getMedicationStatus } = useMedications();
+  const { medications, todayLogs, isLoading, addMedication, logMedication, updateMedication, deleteMedication, getMedicationStatus } = useMedications();
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingMed, setEditingMed] = useState<Medication | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     dosage: "",
@@ -37,20 +55,72 @@ const Medications = () => {
     }
   }, [user, loading, navigate]);
 
-  const handleAddMedication = async (e: React.FormEvent) => {
+  const resetForm = () => {
+    setFormData({ name: "", dosage: "", scheduled_time: "08:00", frequency: "daily", notes: "" });
+    setEditingMed(null);
+  };
+
+  const handleOpenDialog = (med?: Medication) => {
+    if (med) {
+      setEditingMed(med);
+      setFormData({
+        name: med.name,
+        dosage: med.dosage,
+        scheduled_time: med.scheduled_time,
+        frequency: med.frequency,
+        notes: med.notes || "",
+      });
+    } else {
+      resetForm();
+    }
+    setDialogOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await addMedication.mutateAsync(formData);
-      toast({
-        title: "Médicament ajouté",
-        description: `${formData.name} a été ajouté à votre liste.`,
-      });
-      setFormData({ name: "", dosage: "", scheduled_time: "08:00", frequency: "daily", notes: "" });
+      if (editingMed) {
+        await updateMedication.mutateAsync({
+          id: editingMed.id,
+          name: formData.name,
+          dosage: formData.dosage,
+          scheduled_time: formData.scheduled_time,
+          frequency: formData.frequency,
+          notes: formData.notes || null,
+        });
+        toast({
+          title: "Médicament modifié",
+          description: `${formData.name} a été mis à jour.`,
+        });
+      } else {
+        await addMedication.mutateAsync(formData);
+        toast({
+          title: "Médicament ajouté",
+          description: `${formData.name} a été ajouté à votre liste.`,
+        });
+      }
+      resetForm();
       setDialogOpen(false);
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Impossible d'ajouter le médicament.",
+        description: "Impossible de sauvegarder le médicament.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (med: Medication) => {
+    try {
+      await deleteMedication.mutateAsync(med.id);
+      toast({
+        title: "Médicament supprimé",
+        description: `${med.name} a été retiré de votre liste.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le médicament.",
         variant: "destructive",
       });
     }
@@ -106,16 +176,16 @@ const Medications = () => {
           
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button onClick={() => handleOpenDialog()}>
                 <Plus className="h-4 w-4 mr-2" />
                 Ajouter
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Ajouter un médicament</DialogTitle>
+                <DialogTitle>{editingMed ? "Modifier le médicament" : "Ajouter un médicament"}</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleAddMedication} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Nom du médicament</Label>
                   <Input
@@ -155,11 +225,11 @@ const Medications = () => {
                     placeholder="Ex: À prendre avec le repas"
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={addMedication.isPending}>
-                  {addMedication.isPending ? (
+                <Button type="submit" className="w-full" disabled={addMedication.isPending || updateMedication.isPending}>
+                  {(addMedication.isPending || updateMedication.isPending) && (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : null}
-                  Ajouter le médicament
+                  )}
+                  {editingMed ? "Enregistrer" : "Ajouter le médicament"}
                 </Button>
               </form>
             </DialogContent>
@@ -312,6 +382,48 @@ const Medications = () => {
                               </Button>
                             </>
                           )}
+                          
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleOpenDialog(med)}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Modifier
+                              </DropdownMenuItem>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <DropdownMenuItem 
+                                    onSelect={(e) => e.preventDefault()}
+                                    className="text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Supprimer
+                                  </DropdownMenuItem>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Supprimer ce médicament ?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      {med.name} sera retiré de votre liste de médicaments actifs.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => handleDelete(med)}
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                      Supprimer
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
                     );

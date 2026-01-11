@@ -1,4 +1,4 @@
-import { Brain, Bell, User, Menu, LogOut } from "lucide-react";
+import { Brain, Bell, User, Menu, LogOut, Settings, Shield, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,20 +11,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useProfile } from "@/hooks/useProfile";
+import { useTheme } from "@/hooks/useTheme";
 
 const navItems = [
   { label: "Dashboard", path: "/" },
-  { label: "Mood", path: "/mood" },
-  { label: "Medications", path: "/medications" },
+  { label: "Humeur", path: "/mood" },
+  { label: "Médicaments", path: "/medications" },
   { label: "Insights", path: "/insights" },
+  { label: "Crise", path: "/crisis" },
 ];
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { signOut, user } = useAuth();
   const { displayName } = useProfile();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const toggleTheme = () => {
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -65,9 +72,22 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5 text-muted-foreground" />
-            <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary" />
+          <Button variant="ghost" size="icon" onClick={toggleTheme} title="Changer le thème">
+            {resolvedTheme === "dark" ? (
+              <Sun className="h-5 w-5 text-muted-foreground" />
+            ) : (
+              <Moon className="h-5 w-5 text-muted-foreground" />
+            )}
+          </Button>
+
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="relative"
+            onClick={() => navigate("/crisis")}
+            title="Plan de crise"
+          >
+            <Shield className="h-5 w-5 text-muted-foreground" />
           </Button>
           
           <DropdownMenu>
@@ -76,11 +96,20 @@ export function Header() {
                 <User className="h-5 w-5 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-56">
               <div className="px-2 py-1.5">
                 <p className="text-sm font-medium">{displayName}</p>
                 <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
               </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate("/profile")}>
+                <Settings className="h-4 w-4 mr-2" />
+                Paramètres
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/crisis")}>
+                <Shield className="h-4 w-4 mr-2" />
+                Plan de crise
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                 <LogOut className="h-4 w-4 mr-2" />

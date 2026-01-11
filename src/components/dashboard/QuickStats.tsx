@@ -8,8 +8,36 @@ export function QuickStats() {
 
   const isLoading = moodLoading || medLoading;
 
-  // Calculate streak (consecutive days with mood entries)
-  const streak = entries.length > 0 ? Math.min(entries.length, 30) : 0;
+  // Calculate real streak (consecutive days with mood entries)
+  const calculateStreak = () => {
+    if (entries.length === 0) return 0;
+    
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    for (let i = 0; i < 30; i++) {
+      const checkDate = new Date(today);
+      checkDate.setDate(checkDate.getDate() - i);
+      const dateStr = checkDate.toDateString();
+      
+      const hasEntry = entries.some(entry => {
+        const entryDate = new Date(entry.created_at);
+        return entryDate.toDateString() === dateStr;
+      });
+      
+      if (hasEntry) {
+        streak++;
+      } else if (i > 0) {
+        // Allow missing today but break on other missing days
+        break;
+      }
+    }
+    
+    return streak;
+  };
+
+  const streak = calculateStreak();
 
   // Calculate medication adherence
   const takenToday = medications.filter(m => getMedicationStatus(m.id)).length;

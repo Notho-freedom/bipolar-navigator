@@ -118,6 +118,44 @@ export function useMedications() {
     },
   });
 
+  const updateMedication = useMutation({
+    mutationFn: async ({ id, ...updates }: Partial<Medication> & { id: string }) => {
+      if (!user) throw new Error("User not authenticated");
+      
+      const { data, error } = await supabase
+        .from("medications")
+        .update(updates)
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medications", user?.id] });
+    },
+  });
+
+  const deleteMedication = useMutation({
+    mutationFn: async (id: string) => {
+      if (!user) throw new Error("User not authenticated");
+      
+      // Soft delete by setting is_active to false
+      const { error } = await supabase
+        .from("medications")
+        .update({ is_active: false })
+        .eq("id", id)
+        .eq("user_id", user.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medications", user?.id] });
+    },
+  });
+
   // Check which medications have been taken today
   const getMedicationStatus = (medicationId: string) => {
     return todayLogs.find((log) => log.medication_id === medicationId);
@@ -129,6 +167,8 @@ export function useMedications() {
     isLoading,
     addMedication,
     logMedication,
+    updateMedication,
+    deleteMedication,
     getMedicationStatus,
   };
 }
