@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
 import { WelcomeHero } from "@/components/dashboard/WelcomeHero";
 import { MoodCheckIn } from "@/components/dashboard/MoodCheckIn";
@@ -5,8 +8,30 @@ import { QuickStats } from "@/components/dashboard/QuickStats";
 import { MedicationTracker } from "@/components/dashboard/MedicationTracker";
 import { MoodTimeline } from "@/components/dashboard/MoodTimeline";
 import { CrisisResources } from "@/components/dashboard/CrisisResources";
+import { Loader2 } from "lucide-react";
 
 const Index = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />

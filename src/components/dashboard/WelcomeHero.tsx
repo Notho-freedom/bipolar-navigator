@@ -1,11 +1,26 @@
 import { Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useProfile } from "@/hooks/useProfile";
+import { useMoodEntries } from "@/hooks/useMoodEntries";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 export function WelcomeHero() {
+  const { displayName } = useProfile();
+  const { weekEntries } = useMoodEntries();
+  
   const hour = new Date().getHours();
   let greeting = "Bonsoir";
   if (hour < 12) greeting = "Bonjour";
   else if (hour < 18) greeting = "Bon après-midi";
+
+  // Calculate stability streak (consecutive days with mood level 3)
+  const stabilityStreak = weekEntries.reduce((streak, entry) => {
+    if (entry.mood_level === 3) return streak + 1;
+    return 0;
+  }, 0);
+
+  const today = format(new Date(), "EEEE d MMMM", { locale: fr });
 
   return (
     <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/5 via-secondary to-accent/30 p-8 md:p-10">
@@ -16,15 +31,18 @@ export function WelcomeHero() {
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="h-5 w-5 text-primary" />
-          <span className="text-sm font-medium text-primary">Dimanche 12 janvier</span>
+          <span className="text-sm font-medium text-primary capitalize">{today}</span>
         </div>
         
         <h1 className="text-3xl md:text-4xl font-bold mb-2">
-          {greeting}, <span className="gradient-text">Sophie</span>
+          {greeting}, <span className="gradient-text">{displayName}</span>
         </h1>
         
         <p className="text-muted-foreground text-lg mb-6 max-w-md">
-          Vous êtes stable depuis 7 jours. Continuez à prendre soin de vous ! 🌟
+          {stabilityStreak > 0 
+            ? `Vous êtes stable depuis ${stabilityStreak} jour${stabilityStreak > 1 ? 's' : ''}. Continuez à prendre soin de vous ! 🌟`
+            : "Prenez un moment pour faire votre check-in quotidien. 💙"
+          }
         </p>
 
         <div className="flex flex-wrap gap-3">

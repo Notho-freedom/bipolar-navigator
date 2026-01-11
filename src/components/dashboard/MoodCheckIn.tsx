@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Sun, Cloud, CloudRain, Zap } from "lucide-react";
+import { Sparkles, Sun, Cloud, CloudRain, Zap, Loader2 } from "lucide-react";
+import { useMoodEntries } from "@/hooks/useMoodEntries";
+import { useToast } from "@/hooks/use-toast";
 
 const moods = [
   { 
     id: "manic", 
+    level: 5,
     label: "Très énergique", 
     icon: Zap, 
     color: "bg-mood-manic",
@@ -12,6 +15,7 @@ const moods = [
   },
   { 
     id: "hypomanic", 
+    level: 4,
     label: "Énergique", 
     icon: Sun, 
     color: "bg-mood-hypomanic",
@@ -19,6 +23,7 @@ const moods = [
   },
   { 
     id: "stable", 
+    level: 3,
     label: "Stable", 
     icon: Sparkles, 
     color: "bg-mood-stable",
@@ -26,6 +31,7 @@ const moods = [
   },
   { 
     id: "mild-depression", 
+    level: 2,
     label: "Fatigué", 
     icon: Cloud, 
     color: "bg-mood-mildDepression",
@@ -33,6 +39,7 @@ const moods = [
   },
   { 
     id: "depression", 
+    level: 1,
     label: "Difficile", 
     icon: CloudRain, 
     color: "bg-mood-depression",
@@ -42,29 +49,50 @@ const moods = [
 
 export function MoodCheckIn() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { todayEntry, addEntry } = useMoodEntries();
+  const { toast } = useToast();
 
   const handleMoodSelect = (moodId: string) => {
     setSelectedMood(moodId);
   };
 
-  const handleSubmit = () => {
-    if (selectedMood) {
-      setIsSubmitted(true);
-      // Here you would save to database
+  const handleSubmit = async () => {
+    if (!selectedMood) return;
+    
+    const mood = moods.find(m => m.id === selectedMood);
+    if (!mood) return;
+
+    try {
+      await addEntry.mutateAsync({
+        mood_level: mood.level,
+        mood_label: mood.label,
+      });
+      toast({
+        title: "Humeur enregistrée ✨",
+        description: "Merci pour votre check-in quotidien !",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'enregistrer votre humeur.",
+      });
     }
   };
 
-  if (isSubmitted) {
+  if (todayEntry) {
+    const todayMood = moods.find(m => m.level === todayEntry.mood_level);
+    const Icon = todayMood?.icon || Sparkles;
+    
     return (
       <div className="glass-card p-6 animate-scale-in">
         <div className="text-center py-8">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-secondary mb-4">
-            <Sparkles className="h-8 w-8 text-secondary-foreground" />
+          <div className={`inline-flex h-16 w-16 items-center justify-center rounded-full ${todayMood?.color || 'bg-secondary'} mb-4`}>
+            <Icon className="h-8 w-8" />
           </div>
-          <h3 className="text-xl font-semibold mb-2">Merci pour votre check-in</h3>
+          <h3 className="text-xl font-semibold mb-2">Check-in complété !</h3>
           <p className="text-muted-foreground">
-            Votre humeur a été enregistrée. Continuez ainsi ! 💪
+            Vous vous sentez "{todayEntry.mood_label}" aujourd'hui. Continuez ainsi ! 💪
           </p>
         </div>
       </div>
@@ -119,8 +147,13 @@ export function MoodCheckIn() {
             className="w-full" 
             variant="gradient"
             size="lg"
+            disabled={addEntry.isPending}
           >
-            Enregistrer mon humeur
+            {addEntry.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              "Enregistrer mon humeur"
+            )}
           </Button>
         </div>
       )}
