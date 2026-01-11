@@ -1,73 +1,102 @@
-# Welcome to your Lovable project
+# BipolarCare — Compagnon de suivi bipolaire
 
-## Project info
+Application web de suivi quotidien conçue pour les personnes vivant avec un trouble bipolaire. Elle permet de suivre son humeur, ses médicaments, et d'accéder rapidement à des ressources en cas de crise.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## ✨ Fonctionnalités
 
-## How can I edit this code?
+- **Suivi de l'humeur** : Enregistrez votre humeur quotidienne avec notes, sommeil et énergie
+- **Gestion des médicaments** : Suivez vos traitements et votre observance
+- **Insights personnalisés** : Visualisez vos tendances et recevez des recommandations
+- **Ressources de crise** : Accès rapide aux numéros d'urgence et contacts de confiance
+- **Authentification sécurisée** : Vos données restent privées grâce à Supabase Auth
 
-There are several ways of editing your application.
+## 🛠️ Stack technique
 
-**Use Lovable**
+- **Frontend** : React 18 + TypeScript + Vite
+- **Styling** : Tailwind CSS + shadcn/ui
+- **Backend** : Supabase (Auth, Database, Row Level Security)
+- **State** : TanStack Query (React Query)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## 🚀 Démarrage rapide
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prérequis
 
-**Use your preferred IDE**
+- Node.js 18+ (recommandé : utiliser [nvm](https://github.com/nvm-sh/nvm))
+- Un projet Supabase (gratuit sur [supabase.com](https://supabase.com))
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+# 1. Cloner le repo
+git clone https://github.com/Notho-freedom/bipolar-navigator.git
+cd bipolar-navigator
 
-Follow these steps:
+# 2. Installer les dépendances
+npm install
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# 3. Configurer les variables d'environnement
+cp .env.example .env
+# Éditez .env avec vos clés Supabase (voir ci-dessous)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 4. Lancer le serveur de développement
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+L'application sera disponible sur [http://localhost:8080](http://localhost:8080)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Variables d'environnement
 
-**Use GitHub Codespaces**
+Créez un fichier `.env` à la racine du projet :
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```env
+VITE_SUPABASE_URL=https://votre-projet.supabase.co
+VITE_SUPABASE_ANON_KEY=votre_clé_publique_anon
+```
 
-## What technologies are used for this project?
+> Vous trouverez ces valeurs dans votre dashboard Supabase : **Project Settings → API**
 
-This project is built with:
+### Base de données
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Les migrations SQL sont dans `supabase/migrations/`. Si vous utilisez Supabase CLI :
 
-## How can I deploy this project?
+```bash
+supabase db push
+```
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Sinon, exécutez manuellement le contenu du fichier de migration dans l'éditeur SQL de votre dashboard Supabase.
 
-## Can I connect a custom domain to my Lovable project?
+## 📁 Structure du projet
 
-Yes, you can!
+```
+src/
+├── components/
+│   ├── dashboard/    # Composants du tableau de bord
+│   ├── layout/       # Header, navigation
+│   └── ui/           # Composants shadcn/ui
+├── hooks/            # Hooks React (auth, data fetching)
+├── integrations/     # Client et types Supabase
+├── lib/              # Utilitaires
+└── pages/            # Pages de l'application
+    ├── Index.tsx     # Dashboard principal
+    ├── Mood.tsx      # Suivi de l'humeur
+    ├── Medications.tsx # Gestion des médicaments
+    ├── Insights.tsx  # Analyses et tendances
+    └── Auth.tsx      # Connexion / Inscription
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 📜 Scripts disponibles
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+| Commande | Description |
+|----------|-------------|
+| `npm run dev` | Serveur de développement (port 8080) |
+| `npm run build` | Build de production |
+| `npm run preview` | Prévisualiser le build |
+| `npm run lint` | Vérifier le code avec ESLint |
+
+## ⚠️ Avertissement
+
+Cette application est un outil d'accompagnement et **ne remplace en aucun cas un suivi médical professionnel**. En cas de crise, contactez immédiatement les services d'urgence (112) ou une ligne d'écoute spécialisée.
+
+## 📄 Licence
+
+MIT — voir [LICENSE](LICENSE) pour les détails.

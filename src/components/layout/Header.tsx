@@ -2,7 +2,7 @@ import { Brain, Bell, User, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,11 +12,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useProfile } from "@/hooks/useProfile";
 
+const navItems = [
+  { label: "Dashboard", path: "/" },
+  { label: "Mood", path: "/mood" },
+  { label: "Medications", path: "/medications" },
+  { label: "Insights", path: "/insights" },
+];
+
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { signOut, user } = useAuth();
   const { displayName } = useProfile();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSignOut = async () => {
     await signOut();
@@ -39,18 +47,20 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1">
-          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-            Dashboard
-          </Button>
-          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-            Mood
-          </Button>
-          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-            Medications
-          </Button>
-          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-            Insights
-          </Button>
+          {navItems.map((item) => (
+            <Button
+              key={item.path}
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(item.path)}
+              className={location.pathname === item.path 
+                ? "text-foreground font-medium" 
+                : "text-muted-foreground hover:text-foreground"
+              }
+            >
+              {item.label}
+            </Button>
+          ))}
         </nav>
 
         {/* Actions */}
@@ -94,10 +104,19 @@ export function Header() {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-border/40 bg-background p-4 animate-slide-up">
           <nav className="flex flex-col gap-2">
-            <Button variant="ghost" className="justify-start">Dashboard</Button>
-            <Button variant="ghost" className="justify-start">Mood</Button>
-            <Button variant="ghost" className="justify-start">Medications</Button>
-            <Button variant="ghost" className="justify-start">Insights</Button>
+            {navItems.map((item) => (
+              <Button
+                key={item.path}
+                variant="ghost"
+                className={`justify-start ${location.pathname === item.path ? "font-medium bg-muted" : ""}`}
+                onClick={() => {
+                  navigate(item.path);
+                  setMobileMenuOpen(false);
+                }}
+              >
+                {item.label}
+              </Button>
+            ))}
             <Button variant="ghost" className="justify-start text-destructive" onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-2" />
               Se déconnecter
