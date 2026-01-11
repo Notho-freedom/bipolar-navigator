@@ -1,9 +1,27 @@
-import { Brain, Bell, User, Menu } from "lucide-react";
+import { Brain, Bell, User, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useProfile } from "@/hooks/useProfile";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { signOut, user } = useAuth();
+  const { displayName } = useProfile();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
@@ -41,9 +59,26 @@ export function Header() {
             <Bell className="h-5 w-5 text-muted-foreground" />
             <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary" />
           </Button>
-          <Button variant="ghost" size="icon" className="hidden md:flex">
-            <User className="h-5 w-5 text-muted-foreground" />
-          </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="hidden md:flex">
+                <User className="h-5 w-5 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <div className="px-2 py-1.5">
+                <p className="text-sm font-medium">{displayName}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                <LogOut className="h-4 w-4 mr-2" />
+                Se déconnecter
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Button 
             variant="ghost" 
             size="icon" 
@@ -63,6 +98,10 @@ export function Header() {
             <Button variant="ghost" className="justify-start">Mood</Button>
             <Button variant="ghost" className="justify-start">Medications</Button>
             <Button variant="ghost" className="justify-start">Insights</Button>
+            <Button variant="ghost" className="justify-start text-destructive" onClick={handleSignOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Se déconnecter
+            </Button>
           </nav>
         </div>
       )}
