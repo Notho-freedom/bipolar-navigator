@@ -1,57 +1,46 @@
 # Bipolar Navigator
 
-Experimental web browser with context isolation, tab management, and advanced navigation features.
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/) [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/) [![Supabase](https://img.shields.io/badge/Supabase-2-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 
-## 🚀 Features
+Experimental browser-oriented web application exploring navigation, context, tab, and privacy concepts.
 
-- 🧠 **Context isolation** - Isolated browsing contexts per tab
-- 📑 **Advanced tab management** - Tab groups, session restore
-- 🔍 **Smart navigation** - History clustering and quick access
-- 🛡️ **Privacy mode** - Enhanced privacy controls
-- 🎨 **Custom themes** - Dark/light mode with custom styles
+## Stack
 
-## 🛠️ Tech Stack
+- React 18 + TypeScript
+- Vite 5
+- Supabase JavaScript client
+- TanStack React Query
+- React Router
+- Tailwind CSS + Radix UI primitives
+- React Hook Form + Zod
 
-- **Frontend**: TypeScript, Vite, React
-- **Backend**: Supabase (for sync)
-- **Styling**: Tailwind CSS
-- **Deployment**: Vercel
+## Development
 
-## 📁 Project Structure
-
-`
-bipolar-navigator/
-├── src/
-│   ├── components/     # Browser UI components
-│   ├── pages/          # Application routes
-│   └── lib/            # Navigation and context logic
-├── public/
-├── supabase/           # Cloud sync
-└── package.json
-`
-
-## 🚀 Installation
-
-`ash
-git clone https://github.com/Notho-freedom/bipolar-navigator.git
-cd bipolar-navigator
+```bash
 npm install
-`
-
-## 🏃 Running
-
-`ash
 npm run dev
-`
+```
 
-## 📊 Status
+Production build:
 
-Experimental project. Core navigation features implemented.
+```bash
+npm run build
+```
 
-## 👤 Author
+Lint:
 
-[Notho-freedom](https://github.com/Notho-freedom)
+```bash
+npm run lint
+```
 
-## 📄 License
+## Status
+
+**Experimental.** The repository explores browser-style navigation and context concepts; the README avoids presenting these experiments as a production browser.
+
+## Author
+
+**Ravel Momo** — [@Notho-freedom](https://github.com/Notho-freedom)
+
+## License
 
 MIT
